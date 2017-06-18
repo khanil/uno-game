@@ -7,16 +7,27 @@
 
     "rooms": {
       ".read": "true",
+      ".write": "true",
 
       "$roomId": {
-        ".write": "!data.exists() || data.parent().child('owner').val() == auth.uid",
-
-        "capacity": {
-          ".validate": "newData.val() > 2 && newData.val() < 10"
-        },
         "members": {
-          ".validate": "newData.val().length <= data.parent().child('capacity').val()"
+          "$member": {
+            ".validate": "!root.child('users/' + $member + '/room').exists() &&
+              (auth.uid == $roomId || auth.uid == $member)"
+          }
+        },
+        "$other": {
+          ".write": "true",
+          ".validate": "auth.uid == $roomId"
         }
+      }
+    },
+
+    "users": {
+      ".read": "true",
+
+      "$userId": {
+        ".write": "auth.uid == $userId"
       }
     },
 

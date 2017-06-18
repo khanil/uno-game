@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { database } from 'Firebase';
 import user from 'Modules/user';
+import Rooms from 'Containers/Rooms';
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -28,10 +29,20 @@ export default class ReactApp extends Component {
   }
 
   render() {
-    console.log(this.props);
+    const userID = this.props.userUID;
 
     return (
-      <div>{this.props.userUID}</div>
+      <div>
+        <div>{userID}</div>
+
+        {
+          userID ?
+          <Rooms
+            userID={userID}
+          /> :
+          null
+        }
+      </div>
     );
   }
 }
