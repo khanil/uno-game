@@ -1,0 +1,28 @@
+{
+  "rules": {
+    "entities": {
+      ".read": "true",
+      ".write": "false"
+    },
+
+    "rooms": {
+      ".read": "true",
+
+      "$roomId": {
+        ".write": "!data.exists() || data.parent().child('owner').val() == auth.uid",
+
+        "capacity": {
+          ".validate": "newData.val() > 2 && newData.val() < 10"
+        },
+        "members": {
+          ".validate": "newData.val().length <= data.parent().child('capacity').val()"
+        }
+      }
+    },
+
+    "$other": {
+      ".read": "true",
+      ".write": "true"
+    }
+  }
+}
