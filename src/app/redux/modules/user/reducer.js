@@ -2,7 +2,8 @@ import * as t from './actionTypes';
 
 const initialState = {
   loading: false,
-  uid: null
+  uid: null,
+  status: null
 };
 
 export default function(state = initialState, action) {
@@ -18,6 +19,9 @@ export default function(state = initialState, action) {
 
     case t.SIGN_OUT:
       return logout(state);
+
+    case t.RECEIVE_UPDATES:
+      return update(state, action.payload);
 
     default:
       return state;
@@ -47,5 +51,13 @@ function setError(state, { error }) {
 function setLoading(state, loading) {
   return Object.assign({}, state, {
     loading
+  });
+}
+
+function update(state, { updates }) {
+  return Object.assign({}, {
+    loading: state.loading,
+    uid: state.uid,
+    ...updates
   });
 }

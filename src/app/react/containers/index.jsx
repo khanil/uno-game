@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { database } from 'Firebase';
 import user from 'Modules/user';
-import Rooms from 'Containers/Rooms';
+import AuthorizedUser from 'Containers/AuthorizedUser';
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -33,14 +33,12 @@ export default class ReactApp extends Component {
 
     return (
       <div>
-        <div>{userID}</div>
-
         {
           userID ?
-          <Rooms
+          <AuthorizedUser
             userID={userID}
           /> :
-          null
+          <div>You need to authorize</div>
         }
       </div>
     );

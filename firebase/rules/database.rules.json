@@ -12,9 +12,11 @@
       "$roomId": {
         "members": {
           "$member": {
-            ".validate": "!root.child('users/' + $member + '/room').exists() &&
-              (auth.uid == $roomId || auth.uid == $member)"
+            ".validate": "!root.child('users/' + $member + '/room').exists() && root.child('rooms/' + $roomId + '/status').val() != 'playing' && (auth.uid == $roomId || auth.uid == $member)"
           }
+        },
+        "status": {
+          ".validate": "data.parent().exists()"
         },
         "$other": {
           ".write": "true",
@@ -27,7 +29,11 @@
       ".read": "true",
 
       "$userId": {
-        ".write": "auth.uid == $userId"
+        ".write": "auth.uid == $userId",
+
+        "room": {
+          ".validate": "root.child('rooms/' + newData.val() + '/status').val() != 'playing'"
+        }
       }
     },
 

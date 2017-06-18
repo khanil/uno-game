@@ -7,3 +7,11 @@ function getLocal(state) {
 export function getUID(state) {
   return getLocal(state).uid;
 }
+
+export function getRoom(state) {
+  return getLocal(state).room;
+}
+
+export function getStatus(state) {
+  return getLocal(state).status;
+}

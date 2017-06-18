@@ -1,16 +1,13 @@
-import * as t from './actionTypes';
+import * as ac from './actionCreators';
 import { auth, database } from 'Firebase';
 
 export function signInAnonymously() {
   return dispatch => {
-    dispatch( signInRequest() );
+    dispatch( ac.signInRequest() );
 
     auth.signInAnonymously()
-      // .then(user => {
-      //   dispatch( signInSuccess(user.uid) );
-      // })
       .catch(error => {
-        dispatch( signInFailure(error) );
+        dispatch( ac.signInFailure(error) );
       })
   }
 }
@@ -18,40 +15,30 @@ export function signInAnonymously() {
 export function watchAuthChange(dispatch) {
   auth.onAuthStateChanged(user => {
     if (user) {// User is signed in!
-      dispatch( signInSuccess(user.uid) );
+      dispatch( ac.signInSuccess(user.uid) );
     } else { // User is signed out!
-      dispatch( signOut() );
+      dispatch( ac.signOut() );
     }
   });
 }
 
-function signInRequest() {
-  return {
-    type: t.SIGN_IN_REQUEST,
+export function watchForUpdates(userID) {
+  const userRef = database.ref('users/' + userID);
+
+  return dispatch => {
+    dispatch( ac.subscribe() );
+
+    userRef.on('value', (snap) => {
+      dispatch( ac.receiveUpdates(snap.val()) );
+    });
   }
-};
+}
 
-function signInSuccess(uid) {
-  return {
-    type: t.SIGN_IN_SUCCESS,
-    payload: {
-      uid
-    }
+export function stopWatchForUpdates(userID) {
+  const userRef = database.ref('users/' + userID);
+
+  return dispatch => {
+    userRef.off();
+    dispatch( ac.unsubscribe() );
   }
-};
-
-function signInFailure(error) {
-  return {
-    type: t.SIGN_IN_FAILURE,
-    payload: error,
-    error: true
-  }
-};
-
-function signOut() {
-  return {
-    type: t.SIGN_OUT,
-  }
-};
-
-
+}

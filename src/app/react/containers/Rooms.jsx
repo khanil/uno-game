@@ -76,15 +76,17 @@ export default class Rooms extends Component {
           })
         }
 
-        <button onClick={createRoom.bind(null, userID, 2)}>
-          Create room
-        </button>
-        <button onClick={removeRoom.bind(null, userID)}>
-          Remove room
-        </button>
-        <button onClick={startGame.bind(null, userID)}>
-          Start game
-        </button>
+        <div style={{marginTop: "15px"}}>
+          <button onClick={createRoom.bind(null, userID, 2)}>
+            Create room
+          </button>
+          <button onClick={removeRoom.bind(null, userID)}>
+            Remove room
+          </button>
+          <button onClick={startGame.bind(null, userID)}>
+            Start game
+          </button>
+        </div>
       </div>
     );
   }
