@@ -39,8 +39,6 @@ export function create(user, capacity) {
     const newRoomRef = ref.update({
       [user]: room
     });
-
-    usersRef.child(user + "/room").set(user);
   }
 }
 
@@ -49,8 +47,6 @@ export function join(user, id) {
     ref.child(id + "/members").update({
       [user]: true
     });
-
-    usersRef.child(user + "/room").set(id);
   }
 }
 
@@ -59,16 +55,14 @@ export function leave(user, id) {
     ref.child(id + "/members").update({
       [user]: null
     });
-
-    usersRef.child(user + "/room").remove();
   }
 }
 
 export function remove(id) {
   return dispatch => {
-    ref.child(id).remove();
-
-    usersRef.child(id + "/room").remove();
+    ref.child(id).set({
+      deleted: true
+    });
   }
 }
 
