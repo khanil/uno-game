@@ -2,7 +2,9 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
 const User = new require('./user');
+const Game = new require('./game');
 const user = new User(admin);
+const game = new Game(admin);
 
 exports.removeRoom = functions.database.ref('/rooms/{roomID}/deleted')
   .onWrite((event) => {
@@ -20,12 +22,23 @@ exports.removeRoom = functions.database.ref('/rooms/{roomID}/deleted')
       })
 });
 
+exports.changeRoomStatus = functions.database.ref('/rooms/{roomID}/status')
+  .onWrite((event) => {
+    const roomID = event.params.roomID;
+    const delta = event.data;
+
+    // Only if status is "ready"
+    if (delta.val() == 'ready' && delta.previous.val() != 'ready') {
+      return game.init(roomID)
+        .then(() => {
+          return delta.adminRef.set('game');
+        })
+    }
+});
+
 exports.changeRoomMembers = functions.database.ref('/rooms/{roomID}/members/{userID}')
   .onWrite((event) => {
-    const {
-      roomID,
-      userID
-    } = event.params;
+    const { roomID, userID } = event.params;
     const delta = event.data;
     const membersRef = delta.adminRef.parent;
     const roomRef = membersRef.parent;
