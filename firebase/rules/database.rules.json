@@ -12,14 +12,13 @@
       "$roomId": {
         "members": {
           "$member": {
-            ".validate": "!root.child('users/' + $member + '/room').exists() && root.child('rooms/' + $roomId + '/status').val() != 'playing' && (auth.uid == $roomId || auth.uid == $member)"
+            ".validate": "!root.child('users/' + $member + '/room').exists() && (auth.uid == $roomId || auth.uid == $member)"
           }
         },
-        "status": {
-          ".validate": "data.parent().exists()"
+        "membersCount": {
+          ".validate": "auth.token.isAdmin == true"
         },
         "$other": {
-          ".write": "true",
           ".validate": "auth.uid == $roomId"
         }
       }

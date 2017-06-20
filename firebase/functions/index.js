@@ -1,83 +1,54 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
+const User = new require('./user');
+const user = new User(admin);
 
-exports.userConnectionChange = functions.database.ref('/players/{playerId}')
-  .onWrite(event => {
-    const snapshot = event.data;
-
-    const playerId = event.params.playerId;
-    const deckRef = admin.database().ref('deck');
-    const handRef = admin.database().ref('hands/' + playerId);
-    const discardRef = admin.database().ref('discard');
-
-    //player go online
-    if (!snapshot.previous.exists()) {
-      return dealCards(deckRef, handRef);
-    }
-
-    //player go offline
-    if (!snapshot.exists()) {
-      return discardCards(handRef, discardRef);
-    }
-
-    //other cases
-    return null;
+exports.removeRoom = functions.database.ref('/rooms/{roomID}/deleted')
+  .onWrite((event) => {
+    const roomID = event.params.roomID;
+    const delta = event.data;
+    const roomRef = delta.adminRef.parent;
+    console.log(`Remove room ${roomID}.`);
+    return roomRef.remove()
+      .catch((error) => {
+        console.log(`Remove room ${roomID} failed.`);
+        console.log(error.message)
+      })
+      .then(() => {
+        console.log(`Remove room ${roomID} succeeded.`)
+      })
 });
 
-exports.shuffleDeckFromDiscard = functions.database.ref('deck')
-  .onWrite(event => {
-    const snapshot = event.data;
+exports.changeRoomMembers = functions.database.ref('/rooms/{roomID}/members/{userID}')
+  .onWrite((event) => {
+    const {
+      roomID,
+      userID
+    } = event.params;
+    const delta = event.data;
+    const membersRef = delta.adminRef.parent;
+    const roomRef = membersRef.parent;
+    let action = delta.exists() ? 'join' : 'leave';
 
-    if (!snapshot.exists()) {
-      const discardRef = admin.database().ref('discard');
-      return shuffleDiscard(snapshot.ref, discardRef);
-    }
-
-    return;
-})
-
-function dealCards(deckRef, handRef) {
-  return deckRef.limitToFirst(4).once('value')
-    .then(snapshot => {
-      const cards = snapshot.val();
-
-      const updates = Object.assign({}, cards);
-      for (key in updates) {
-        updates[key] = null;
-      }
-
-      return Promise.all([
-        handRef.set(cards),
-        deckRef.update(updates)
-      ]);
-    })
-}
-
-function discardCards(handRef, discardRef) {
-  return Promise.all([
-    handRef.once('value'),
-    discardRef.once('value')
-  ])
-  .then(snapshots => {
-    const hand = snapshots[0].val();
-    const discard = snapshots[1].val();
-
-    return Promise.all([
-      handRef.set(null),
-      ...Object.keys(hand).map(key => discardRef.push(hand[key]))
-    ]);
-  })
-}
-
-function shuffleDiscard(deckRef, discardRef) {
-  return discardRef.once('value')
-    .then(snapshot => {
-      const cards = snapshot.val();
-
-      return Promise.all([
-        deckRef.set(cards),
-        discardRef.set(null)
-      ])
-    })
-}
+    console.log(`User ${userID} ${action} room ${roomID}`);
+    return membersRef.once('value')
+      .then((snap) => {
+        // All members was deleted
+        if (!snap.exists()) {
+          return null;
+        }
+        const membersCount = snap.numChildren();
+        return roomRef.update({
+          membersCount
+        })
+      })
+      .then(() => {
+        return user.changeRoom(
+          userID,
+          action == 'join'
+            ? roomID
+            : null
+        );
+      })
+});
