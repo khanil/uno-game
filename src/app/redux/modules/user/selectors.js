@@ -8,10 +8,10 @@ export function getUID(state) {
   return getLocal(state).uid;
 }
 
-export function getRoom(state) {
+export function getRoomID(state) {
   return getLocal(state).room;
 }
 
-export function getStatus(state) {
+export function getRoomStatus(state) {
   return getLocal(state).status;
 }

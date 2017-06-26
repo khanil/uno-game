@@ -49,3 +49,21 @@ export function receiveUpdates(updates) {
     }
   }
 }
+
+export function subscribeRoomStatus(roomID) {
+  return {
+    type: t.SUBSCRIBE_ROOM_STATUS,
+    payload: {
+      roomID
+    }
+  }
+}
+
+export function unsubscribeRoomStatus(roomID) {
+  return {
+    type: t.UNSUBSCRIBE_ROOM_STATUS,
+    payload: {
+      roomID
+    }
+  }
+}

@@ -3,7 +3,8 @@ import * as t from './actionTypes';
 const initialState = {
   loading: false,
   uid: null,
-  status: null
+  room: null,
+  status: null,
 };
 
 export default function(state = initialState, action) {
@@ -55,9 +56,5 @@ function setLoading(state, loading) {
 }
 
 function update(state, { updates }) {
-  return Object.assign({}, {
-    loading: state.loading,
-    uid: state.uid,
-    ...updates
-  });
+  return Object.assign({}, state, updates);
 }

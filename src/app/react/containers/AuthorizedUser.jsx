@@ -6,14 +6,16 @@ import Rooms from 'Containers/Rooms';
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    room: user.selectors.getRoom(state),
-    status: user.selectors.getStatus(state)
+    room: user.selectors.getRoomID(state),
+    status: user.selectors.getRoomStatus(state)
   }
 };
 
 const mapDispatchToProps = {
   watchForUpdates: user.actions.watchForUpdates,
-  stopWatchForUpdates: user.actions.stopWatchForUpdates
+  stopWatchForUpdates: user.actions.stopWatchForUpdates,
+  watchForRoomStatus: user.actions.watchForRoomStatus,
+  stopWatchForRoomStatus: user.actions.stopWatchForRoomStatus
 };
 
 @connect(mapStateToProps, mapDispatchToProps)
@@ -33,6 +35,25 @@ export default class AuthorizedUser extends Component {
     } = this.props;
 
     watchForUpdates(userID);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.room != this.props.room) {
+      const oldRoom = this.props.room;
+      const newRoom = nextProps.room;
+
+      if (!oldRoom) {
+        this.props.watchForRoomStatus(newRoom);
+        return;
+      }
+
+      this.props.stopWatchForRoomStatus(oldRoom);
+
+      if (newRoom) {
+        this.props.watchForRoomStatus(newRoom);
+        return;
+      }
+    }
   }
 
   componentWillUnmount() {

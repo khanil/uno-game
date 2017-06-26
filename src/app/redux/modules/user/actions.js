@@ -23,13 +23,15 @@ export function watchAuthChange(dispatch) {
 }
 
 export function watchForUpdates(userID) {
-  const userRef = database.ref('users/' + userID);
+  const userRef = database.ref('users/' + userID + '/room');
 
   return dispatch => {
     dispatch( ac.subscribe() );
 
     userRef.on('value', (snap) => {
-      dispatch( ac.receiveUpdates(snap.val()) );
+      const updates = { room: snap.val() };
+
+      dispatch( ac.receiveUpdates(updates) );
     });
   }
 }
@@ -40,5 +42,29 @@ export function stopWatchForUpdates(userID) {
   return dispatch => {
     userRef.off();
     dispatch( ac.unsubscribe() );
+  }
+}
+
+export function watchForRoomStatus(roomID) {
+  const roomRef = database.ref('rooms/' + roomID +'/status');
+
+  return dispatch => {
+    dispatch( ac.subscribeRoomStatus(roomID) );
+
+    roomRef.on('value', (snap) => {
+      const updates = { status: snap.val() };
+
+      dispatch( ac.receiveUpdates(updates) );
+    });
+  }
+}
+
+export function stopWatchForRoomStatus(roomID) {
+  const roomRef = database.ref('rooms/' + roomID +'/status');
+
+  return dispatch => {
+    roomRef.off();
+    dispatch( ac.unsubscribeRoomStatus(roomID) );
+    dispatch( ac.receiveUpdates({ status: null }) );
   }
 }
